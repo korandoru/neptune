@@ -49,9 +49,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Check code style
-        run: >
-          cd neptune-backend
-          ./gradlew spotlessCheck
+        working-directory: neptune-backend
+        run: ./gradlew spotlessCheck
 
   sanitycheck:
     if: (github.event_name != 'schedule') || (github.repository == 'korandoru/neptune')
@@ -83,9 +82,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Gradle test
-        run: >
-          cd neptune-backend
-          ./gradlew test
+        working-directory: neptune-backend
+        run: ./gradlew test
 
   required:
     name: Required

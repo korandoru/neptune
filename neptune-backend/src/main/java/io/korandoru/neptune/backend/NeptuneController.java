@@ -17,10 +17,10 @@
 package io.korandoru.neptune.backend;
 
 import io.korandoru.neptune.backend.query.AffinityFamousQuery;
+import io.korandoru.neptune.backend.query.AffinityFamousResult;
 import io.korandoru.neptune.backend.query.AffinityRatioQuery;
 import io.korandoru.neptune.backend.query.AffinityRatioResult;
 import io.korandoru.neptune.backend.query.RepositoriesRequest;
-import io.korandoru.neptune.backend.query.AffinityFamousResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

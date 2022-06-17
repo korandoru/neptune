@@ -18,5 +18,5 @@ package io.korandoru.neptune.backend.query;
 
 import java.util.List;
 
-public record AffinityFamousRequest(List<String> origins) {
+public record RepositoriesRequest(List<String> origins) {
 }

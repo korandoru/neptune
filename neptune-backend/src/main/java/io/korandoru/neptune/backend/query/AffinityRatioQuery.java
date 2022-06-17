@@ -26,17 +26,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class AffinityFamousQuery {
+public class AffinityRatioQuery {
 
     private final NamedParameterJdbcTemplate jdbc;
 
     @Autowired
-    public AffinityFamousQuery(NamedParameterJdbcTemplate jdbc) {
+    public AffinityRatioQuery(NamedParameterJdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
-    public AffinityFamousResult doQuery(List<String> origins) {
-        log.debug("AffinityFamousQuery.doQuery with origins: {}", origins);
+    public AffinityRatioResult doQuery(List<String> origins) {
+        log.debug("AffinityRatioQuery.doQuery with origins: {}", origins);
 
         final var parameters = new MapSqlParameterSource();
         parameters.addValue("origins", origins);
@@ -44,27 +44,32 @@ public class AffinityFamousQuery {
         final var result = this.jdbc.queryForList("""
                 SELECT
                     repo_name,
-                    count() AS stars
+                    uniq(actor_login) AS total_stars,
+                    uniqIf(actor_login, actor_login IN
+                    (
+                        SELECT actor_login
+                        FROM github_events
+                        WHERE (event_type = 'WatchEvent') AND (repo_name IN (:origins))
+                    )) AS our_stars,
+                    round(our_stars / total_stars, 2) AS ratio
                 FROM github_events
-                WHERE (event_type = 'WatchEvent') AND (actor_login IN
-                (
-                    SELECT actor_login
-                    FROM github_events
-                    WHERE (event_type = 'WatchEvent') AND (repo_name IN (:origins))
-                )) AND (repo_name NOT IN (:origins))
+                WHERE (event_type = 'WatchEvent') AND (repo_name NOT IN (:origins))
                 GROUP BY repo_name
-                ORDER BY stars DESC
+                HAVING total_stars >= 100
+                ORDER BY ratio DESC
                 LIMIT 50
             """, parameters);
 
-        final var crosses = new ArrayList<AffinityFamousResult.Item>();
+        final var crosses = new ArrayList<AffinityRatioResult.Item>();
         for (var item : result) {
-            crosses.add(new AffinityFamousResult.Item(
+            crosses.add(new AffinityRatioResult.Item(
                 (String) item.get("repo_name"),
-                (long) item.get("stars"))
-            );
+                (long) item.get("total_stars"),
+                (long) item.get("our_stars"),
+                (double) item.get("ratio")
+            ));
         }
-        return new AffinityFamousResult(origins, crosses);
+        return new AffinityRatioResult(origins, crosses);
     }
 
 }

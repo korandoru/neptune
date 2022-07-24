@@ -16,21 +16,19 @@
 
 import type {NextApiRequest, NextApiResponse} from 'next'
 import axios from "axios";
-
-type StarAffinityRatio = {
-    repoName: string
-    totalStars: number,
-    ourStars: number,
-    ratio: number,
-}
+import {StarAffinityRatio} from "../../../interfaces";
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<StarAffinityRatio[]>
 ) {
-    let paramOrigins = req.body.origins.map((origin: string) => `'${origin}'`);
-    paramOrigins = paramOrigins.join(',');
-    paramOrigins = `[${paramOrigins}]`;
+    console.log(req.body);
+    console.log(req.query);
+    // let paramOrigins = req.body.origins.map((origin: string) => `'${origin}'`);
+    // paramOrigins = paramOrigins.join(',');
+    // paramOrigins = `[${paramOrigins}]`;
+
+    let paramOrigins = `['apache/pulsar']`;
 
     let result = await axios.get('https://play.clickhouse.com', {
         params: {

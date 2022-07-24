@@ -15,11 +15,23 @@
  */
 
 import type {NextPage} from 'next'
+import type {StarAffinityRatio} from "../interfaces";
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import useRequest from "../libs/useRequest";
 
 const Home: NextPage = () => {
+    const {data} = useRequest<StarAffinityRatio[]>({
+        url: '/api/affinity/ratio',
+        params: {id: 12345},
+        data: {
+            origins: ['apache/pulsar', 'apache/pulsar-site']
+        }
+    });
+
+    if (!data) return <div>Loading...</div>
+
     return (
         <div className={styles.container}>
             <Head>
@@ -33,6 +45,22 @@ const Home: NextPage = () => {
                     Neptune Dashboard
                 </h1>
 
+                <table>
+                    <tr>
+                        <th>RepoName</th>
+                        <th>TotalStars</th>
+                        <th>OurStars</th>
+                        <th>Ratio</th>
+                    </tr>
+                    {data.map((record) => (
+                        <tr key={record.repoName}>
+                            <td>{record.repoName}</td>
+                            <td>{record.totalStars}</td>
+                            <td>{record.ourStars}</td>
+                            <td>{record.ratio}</td>
+                        </tr>
+                    ))}
+                </table>
 
             </main>
 

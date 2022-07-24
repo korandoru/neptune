@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "axios": "^0.27.2",
     "echarts": "^5.3.3",
     "echarts-for-react": "^3.0.2",
     "next": "12.2.3",

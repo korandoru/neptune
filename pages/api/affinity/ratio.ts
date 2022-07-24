@@ -17,14 +17,16 @@
 import type {NextApiRequest, NextApiResponse} from 'next'
 import axios from "axios";
 
-type Data = {
+type StarAffinityRatio = {
     repoName: string
-    stars: number,
+    totalStars: number,
+    ourStars: number,
+    ratio: number,
 }
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data[]>
+    res: NextApiResponse<StarAffinityRatio[]>
 ) {
     let paramOrigins = req.body.origins.map((origin: string) => `'${origin}'`);
     paramOrigins = paramOrigins.join(',');
@@ -33,33 +35,35 @@ export default async function handler(
     let result = await axios.get('https://play.clickhouse.com', {
         params: {
             "user": "explorer",
+            "default_format": "JSON",
             "param_origins": paramOrigins,
         },
         data: `
             SELECT
                 repo_name,
-                count() AS stars
+                uniq(actor_login) AS total_stars,
+                uniqIf(actor_login, actor_login IN
+                (
+                    SELECT actor_login
+                    FROM github_events
+                    WHERE (event_type = 'WatchEvent') AND (repo_name IN ({origins:Array(String)}))
+                )) AS our_stars,
+                round(our_stars / total_stars, 2) AS ratio
             FROM github_events
-            WHERE (event_type = 'WatchEvent') AND (actor_login IN
-            (
-                SELECT actor_login
-                FROM github_events
-                WHERE (event_type = 'WatchEvent') AND (repo_name IN ({origins:Array(String)}))
-            )) AND (repo_name NOT IN ({origins:Array(String)}))
+            WHERE (event_type = 'WatchEvent') AND (repo_name NOT IN ({origins:Array(String)}))
             GROUP BY repo_name
-            ORDER BY stars DESC
+            HAVING total_stars >= 100
+            ORDER BY ratio DESC
             LIMIT 50
-            FORMAT JSON
         `
     });
 
-    let data: Data[] = [];
-    for (let {repo_name, stars} of result.data.data) {
-        data.push({
-            repoName: repo_name,
-            stars: stars,
-        });
-    }
-
-    res.status(200).json(data);
+    res.status(200).json(result.data.data.map((record: any) => {
+        return {
+            repoName: record.repo_name,
+            totalStars: record.total_stars,
+            ourStars: record.our_stars,
+            ratio: record.ratio,
+        }
+    }));
 }

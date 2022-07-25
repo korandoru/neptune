@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type {GetServerSideProps, NextPage} from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { getData } from '../libs/useRequest';
+import { fetchAffinityRatio } from '../libs/dataFetcher';
 import styles from '../styles/Home.module.css'
 
 type Data =   {
@@ -32,6 +31,8 @@ interface Props {
 }
 
 const Home = ({ data }: Props) => {
+    if (!data) return <div>Loading...</div>
+
     return (
         <div className={styles.container}>
             <Head>
@@ -87,8 +88,8 @@ const Home = ({ data }: Props) => {
 export default Home
 
 // This gets called on every request
-export const getServerSideProps: GetServerSideProps = async () => {
-    const result = await getData("['apache/pulsar,apache/pulsar-site']")
+export async function getServerSideProps() {
+    const result = await fetchAffinityRatio(['apache/pulsar', 'apache/pulsar-site'])
     const data = result.data.map((record: any) => {
         return {
             repoName: record.repo_name,
@@ -97,7 +98,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
             ratio: record.ratio,
         }
     });
-    if (!data) return <div>Loading...</div>
 
     return { props: { data } }
 }

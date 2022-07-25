@@ -16,18 +16,13 @@
 
 import type {NextApiRequest, NextApiResponse} from 'next'
 import {StarAffinityRatio} from "../../../interfaces";
-import { getData } from '../../../libs/useRequest';
+import { fetchAffinityRatio } from '../../../libs/dataFetcher';
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<StarAffinityRatio[]>
 ) {
-
-    let paramOrigins = req.body.origins.map((origin: string) => `'${origin}'`);
-    paramOrigins = paramOrigins.join(',');
-    paramOrigins = `[${paramOrigins}]`;
-
-    const result = await getData(paramOrigins);
+    const result = await fetchAffinityRatio(req.body.origins);
 
     res.status(200).json(result.data.map((record: any) => {
         return {

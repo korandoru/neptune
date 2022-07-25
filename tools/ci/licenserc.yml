@@ -20,3 +20,5 @@ header:
     - '**/*.ts'
     - '**/*.tsx'
     - '**/*.yml'
+  paths-ignore:
+    - 'next-env.d.ts'

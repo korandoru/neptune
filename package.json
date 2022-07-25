@@ -2,6 +2,14 @@
   "name": "neptune",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@7.6.0",
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=7.0.0",
+    "yarn": ">2 <1",
+    "npm": ">2 <1"
+  },
+
   "scripts": {
     "dev": "next dev",
     "build": "next build",

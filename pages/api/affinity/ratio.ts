@@ -15,44 +15,16 @@
  */
 
 import type {NextApiRequest, NextApiResponse} from 'next'
-import axios from "axios";
 import {StarAffinityRatio} from "../../../interfaces";
+import { fetchAffinityRatio } from '../../../libs/dataFetcher';
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<StarAffinityRatio[]>
 ) {
-    let paramOrigins = req.body.origins.map((origin: string) => `'${origin}'`);
-    paramOrigins = paramOrigins.join(',');
-    paramOrigins = `[${paramOrigins}]`;
+    const result = await fetchAffinityRatio(req.body.origins);
 
-    let result = await axios.get('https://play.clickhouse.com', {
-        params: {
-            "user": "explorer",
-            "default_format": "JSON",
-            "param_origins": paramOrigins,
-        },
-        data: `
-            SELECT
-                repo_name,
-                uniq(actor_login) AS total_stars,
-                uniqIf(actor_login, actor_login IN
-                (
-                    SELECT actor_login
-                    FROM github_events
-                    WHERE (event_type = 'WatchEvent') AND (repo_name IN ({origins:Array(String)}))
-                )) AS our_stars,
-                round(our_stars / total_stars, 2) AS ratio
-            FROM github_events
-            WHERE (event_type = 'WatchEvent') AND (repo_name NOT IN ({origins:Array(String)}))
-            GROUP BY repo_name
-            HAVING total_stars >= 100
-            ORDER BY ratio DESC
-            LIMIT 50
-        `
-    });
-
-    res.status(200).json(result.data.data.map((record: any) => {
+    res.status(200).json(result.data.map((record: any) => {
         return {
             repoName: record.repo_name,
             totalStars: record.total_stars,

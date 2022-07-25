@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-import type {NextPage} from 'next'
-import type {StarAffinityRatio} from "../interfaces";
+import type {GetServerSideProps, NextPage} from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
+import { getData } from '../libs/useRequest';
 import styles from '../styles/Home.module.css'
-import useRequest from "../libs/useRequest";
 
-const Home: NextPage = () => {
-    const {data} = useRequest<StarAffinityRatio[]>({
-        url: '/api/affinity/ratio',
-        method: 'POST',
-        params: {id: 12345},
-        data: {
-            origins: ['apache/pulsar', 'apache/pulsar-site']
-        }
-    });
+type Data =   {
+    repoName: string,
+    totalStars: string,
+    ourStars: string,
+    ratio: number
+}[];
 
-    if (!data) return <div>Loading...</div>
+interface Props {
+    data: Data
+}
 
+const Home = ({ data }: Props) => {
     return (
         <div className={styles.container}>
             <Head>
@@ -47,20 +46,24 @@ const Home: NextPage = () => {
                 </h1>
 
                 <table>
-                    <tr>
-                        <th>RepoName</th>
-                        <th>TotalStars</th>
-                        <th>OurStars</th>
-                        <th>Ratio</th>
-                    </tr>
-                    {data.map((record) => (
-                        <tr key={record.repoName}>
-                            <td>{record.repoName}</td>
-                            <td>{record.totalStars}</td>
-                            <td>{record.ourStars}</td>
-                            <td>{record.ratio}</td>
+                    <thead>
+                        <tr>
+                            <th>RepoName</th>
+                            <th>TotalStars</th>
+                            <th>OurStars</th>
+                            <th>Ratio</th>
                         </tr>
-                    ))}
+                    </thead>
+                    <tbody>
+                        {data.map((record) => (
+                            <tr key={record.repoName}>
+                                <td>{record.repoName}</td>
+                                <td>{record.totalStars}</td>
+                                <td>{record.ourStars}</td>
+                                <td>{record.ratio}</td>
+                            </tr>
+                        ))}
+                    </tbody>
                 </table>
 
             </main>
@@ -73,8 +76,8 @@ const Home: NextPage = () => {
                 >
                     Powered by{' '}
                     <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16}/>
-          </span>
+                        <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16}/>
+                    </span>
                 </a>
             </footer>
         </div>
@@ -82,3 +85,19 @@ const Home: NextPage = () => {
 }
 
 export default Home
+
+// This gets called on every request
+export const getServerSideProps: GetServerSideProps = async () => {
+    const result = await getData("['apache/pulsar,apache/pulsar-site']")
+    const data = result.data.map((record: any) => {
+        return {
+            repoName: record.repo_name,
+            totalStars: record.total_stars,
+            ourStars: record.our_stars,
+            ratio: record.ratio,
+        }
+    });
+    if (!data) return <div>Loading...</div>
+
+    return { props: { data } }
+}

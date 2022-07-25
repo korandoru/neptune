@@ -68,3 +68,39 @@ export default function useRequest<Data = unknown, Error = unknown>(
         mutate
     }
 }
+
+
+export const getData = async (paramOrigins: string) => {
+    const response = await fetch(`https://play.clickhouse.com?${
+        new URLSearchParams({
+        "user": "explorer",
+        "default_format": "JSON",
+        "param_origins": paramOrigins,
+    })}`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: `
+        SELECT
+            repo_name,
+            uniq(actor_login) AS total_stars,
+            uniqIf(actor_login, actor_login IN
+            (
+                SELECT actor_login
+                FROM github_events
+                WHERE (event_type = 'WatchEvent') AND (repo_name IN ({origins:Array(String)}))
+            )) AS our_stars,
+            round(our_stars / total_stars, 2) AS ratio
+        FROM github_events
+        WHERE (event_type = 'WatchEvent') AND (repo_name NOT IN ({origins:Array(String)}))
+        GROUP BY repo_name
+        HAVING total_stars >= 100
+        ORDER BY ratio DESC
+        LIMIT 50
+    `
+    })
+    const jsonData = await response.json()
+    return jsonData
+}

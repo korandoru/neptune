@@ -31,7 +31,6 @@ interface Props {
 }
 
 const Home = ({ data }: Props) => {
-    if (!data) return <div>Loading...</div>
 
     return (
         <div className={styles.container}>

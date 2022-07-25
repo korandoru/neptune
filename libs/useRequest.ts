@@ -17,7 +17,7 @@
 import useSWR, { SWRConfiguration, SWRResponse } from 'swr'
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
-export type GetRequest = AxiosRequestConfig | null
+export type AxiosRequest = AxiosRequestConfig | null
 
 interface Return<Data, Error>
     extends Pick<
@@ -37,7 +37,7 @@ export interface Config<Data = unknown, Error = unknown>
 }
 
 export default function useRequest<Data = unknown, Error = unknown>(
-    request: GetRequest,
+    request: AxiosRequest,
     { fallbackData, ...config }: Config<Data, Error> = {}
 ): Return<Data, Error> {
     const {
@@ -47,10 +47,7 @@ export default function useRequest<Data = unknown, Error = unknown>(
         mutate
     } = useSWR<AxiosResponse<Data>, AxiosError<Error>>(
         request && JSON.stringify(request),
-        () => {
-            console.log("useRequest: " + request!);
-            return axios.request<Data>(request!);
-        },
+        () => axios.request<Data>(request!),
         {
             ...config,
             fallbackData: fallbackData && {

@@ -22,13 +22,9 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<StarAffinityRatio[]>
 ) {
-    console.log(req.body);
-    console.log(req.query);
-    // let paramOrigins = req.body.origins.map((origin: string) => `'${origin}'`);
-    // paramOrigins = paramOrigins.join(',');
-    // paramOrigins = `[${paramOrigins}]`;
-
-    let paramOrigins = `['apache/pulsar']`;
+    let paramOrigins = req.body.origins.map((origin: string) => `'${origin}'`);
+    paramOrigins = paramOrigins.join(',');
+    paramOrigins = `[${paramOrigins}]`;
 
     let result = await axios.get('https://play.clickhouse.com', {
         params: {

@@ -24,6 +24,7 @@ import useRequest from "../libs/useRequest";
 const Home: NextPage = () => {
     const {data} = useRequest<StarAffinityRatio[]>({
         url: '/api/affinity/ratio',
+        method: 'POST',
         params: {id: 12345},
         data: {
             origins: ['apache/pulsar', 'apache/pulsar-site']

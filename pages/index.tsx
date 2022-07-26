@@ -32,7 +32,15 @@ export default function Home() {
                     Neptune Dashboard
                 </h1>
 
-                <Link href="/affinity/ratio">Repository Affinity Ratio</Link>
+                <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
+                    <Link
+                        href="/affinity/ratio"
+                        className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
+                    >
+                        Repository Affinity Ratio
+                    </Link>
+                </div>
+
             </main>
 
             <Footer/>

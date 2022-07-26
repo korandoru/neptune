@@ -22,3 +22,5 @@ header:
     - '**/*.yml'
   paths-ignore:
     - 'next-env.d.ts'
+    - 'postcss.config.js'
+    - 'tailwind.config.js'

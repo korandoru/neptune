@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import styles from "../styles/Home.module.css";
 import Image from "next/image";
 
 export default function Footer() {
     return (
-        <footer className={styles.footer}>
+        <footer className="flex items-center justify-center w-full h-24 border-t">
             <a
+                className="flex items-center justify-center"
                 href="https://vercel.com?utm_source=korandoru&utm_campaign=oss"
                 target="_blank"
                 rel="noopener noreferrer"
             >
                 Powered by{' '}
-                <span className={styles.logo}>
-                        <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16}/>
-                    </span>
+                <img src="/vercel.svg" alt="Vercel Logo" className="h-4 ml-2" />
             </a>
         </footer>
     );

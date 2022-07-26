@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-export const fetchAffinityRatio = async (origins: string[]) => {
-    let paramOrigins = `[${origins.map(o => `'${o}'`).join(',')}]`;
+export async function fetchAffinityRatio() {
     const queryParams = new URLSearchParams({
         "user": "explorer",
         "default_format": "JSON",
-        "param_origins": paramOrigins,
     });
     const response = await fetch(`https://play.clickhouse.com?${queryParams}`, {
         method: "POST",
@@ -35,11 +33,11 @@ export const fetchAffinityRatio = async (origins: string[]) => {
             (
                 SELECT actor_login
                 FROM github_events
-                WHERE (event_type = 'WatchEvent') AND (repo_name IN ({origins:Array(String)}))
+                WHERE (event_type = 'WatchEvent') AND (startsWith(repo_name, 'apache/pulsar'))
             )) AS our_stars,
             round(our_stars / total_stars, 2) AS ratio
         FROM github_events
-        WHERE (event_type = 'WatchEvent') AND (repo_name NOT IN ({origins:Array(String)}))
+        WHERE (event_type = 'WatchEvent') AND (NOT startsWith(repo_name, 'apache/pulsar'))
         GROUP BY repo_name
         HAVING total_stars >= 100
         ORDER BY ratio DESC

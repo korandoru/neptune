@@ -15,24 +15,11 @@
  */
 
 import Head from 'next/head'
-import Image from 'next/image'
-import { fetchAffinityRatio } from '../libs/dataFetcher';
 import styles from '../styles/Home.module.css'
+import Link from "next/link";
+import Footer from "../components/footer";
 
-type Data =   {
-    repoName: string,
-    totalStars: string,
-    ourStars: string,
-    ratio: number
-}[];
-
-interface Props {
-    data: Data
-}
-
-const Home = ({ data }: Props) => {
-    if (!data) return <div>Loading...</div>
-
+export default function Home() {
     return (
         <div className={styles.container}>
             <Head>
@@ -46,58 +33,10 @@ const Home = ({ data }: Props) => {
                     Neptune Dashboard
                 </h1>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RepoName</th>
-                            <th>TotalStars</th>
-                            <th>OurStars</th>
-                            <th>Ratio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.map((record) => (
-                            <tr key={record.repoName}>
-                                <td>{record.repoName}</td>
-                                <td>{record.totalStars}</td>
-                                <td>{record.ourStars}</td>
-                                <td>{record.ratio}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
+                <Link href="/affinity/ratio">Repository Affinity Ratio</Link>
             </main>
 
-            <footer className={styles.footer}>
-                <a
-                    href="https://vercel.com?utm_source=korandoru&utm_campaign=oss"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Powered by{' '}
-                    <span className={styles.logo}>
-                        <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16}/>
-                    </span>
-                </a>
-            </footer>
+            <Footer/>
         </div>
     )
-}
-
-export default Home
-
-// This gets called on every request
-export async function getServerSideProps() {
-    const result = await fetchAffinityRatio(['apache/pulsar', 'apache/pulsar-site'])
-    const data = result.data.map((record: any) => {
-        return {
-            repoName: record.repo_name,
-            totalStars: record.total_stars,
-            ourStars: record.our_stars,
-            ratio: record.ratio,
-        }
-    });
-
-    return { props: { data } }
 }

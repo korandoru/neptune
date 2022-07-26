@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import {fetchAffinityRatio} from "../../libs/dataFetcher";
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import {StarAffinityRatio} from "../../interfaces";
 import Footer from "../../components/footer";
+import useSWR from 'swr'
+import fetch from '../../libs/fetch'
 
-interface Props {
-    data: StarAffinityRatio[]
-}
+export default function AffinityRatio() {
+    const {data} = useSWR<StarAffinityRatio[]>('/api/affinity/ratio', fetch);
 
-export default function AffinityRatio({data}: Props) {
     return (
         <div className={styles.container}>
             <Head>
@@ -38,43 +37,32 @@ export default function AffinityRatio({data}: Props) {
                     Repository Affinity Ratio
                 </h1>
 
-                <table>
-                    <thead>
-                    <tr>
-                        <th>RepoName</th>
-                        <th>TotalStars</th>
-                        <th>OurStars</th>
-                        <th>Ratio</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {data.map((record) => (
-                        <tr key={record.repoName}>
-                            <td>{record.repoName}</td>
-                            <td>{record.totalStars}</td>
-                            <td>{record.ourStars}</td>
-                            <td>{record.ratio}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-
+                {data ? (
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>RepoName</th>
+                                <th>TotalStars</th>
+                                <th>OurStars</th>
+                                <th>Ratio</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {data.map((record) => (
+                                <tr key={record.repoName}>
+                                    <td>{record.repoName}</td>
+                                    <td>{record.totalStars}</td>
+                                    <td>{record.ourStars}</td>
+                                    <td>{record.ratio}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>)
+                    : (<div>Loading...</div>)
+                }
             </main>
 
             <Footer/>
         </div>
     )
-}
-
-export async function getServerSideProps() {
-    const result = await fetchAffinityRatio();
-    const data = result.data.map((record: any) => {
-        return {
-            repoName: record.repo_name,
-            totalStars: record.total_stars,
-            ourStars: record.our_stars,
-            ratio: record.ratio,
-        }
-    });
-    return {props: {data}}
 }

@@ -50,5 +50,5 @@ jobs:
         with:
           node-version: '17.x'
       - run: pnpm install
-      - run: pnpm run lint
-      - run: pnpm run build
+      - run: pnpm lint --max-warnings 0
+      - run: pnpm build

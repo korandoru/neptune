@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+export async function fetcher<JSON = any>(
+    input: RequestInfo,
+    init?: RequestInit
+): Promise<JSON> {
+    const res = await fetch(input, init)
+    return res.json()
+}
+
 export async function fetchAffinityRatio() {
     const queryParams = new URLSearchParams({
         "user": "explorer",

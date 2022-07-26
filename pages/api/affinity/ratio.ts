@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {fetchAffinityRatio} from "../../../libs/dataFetcher";
 import {StarAffinityRatio} from "../../../interfaces";
 import {NextApiRequest, NextApiResponse} from "next";
+import {fetchAffinityRatio} from "../../../libs/fetcher";
 
 export default async function handler(
     req: NextApiRequest,

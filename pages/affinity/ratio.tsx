@@ -18,10 +18,10 @@ import Head from 'next/head'
 import {StarAffinityRatio} from "../../interfaces";
 import Footer from "../../components/footer";
 import useSWR from 'swr'
-import fetch from '../../libs/fetch'
+import {fetcher} from "../../libs/fetcher";
 
 export default function AffinityRatio() {
-    const {data} = useSWR<StarAffinityRatio[]>('/api/affinity/ratio', fetch);
+    const {data} = useSWR<StarAffinityRatio[]>('/api/affinity/ratio', fetcher);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-2">

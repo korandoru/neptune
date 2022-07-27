@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-import {StarAffinityRatio} from "../../../interfaces";
-import {NextApiRequest, NextApiResponse} from "next";
-import {fetchAffinityRatio} from "../../../libs/fetcher";
+import {Octokit} from "octokit";
+import * as dotenv from "dotenv";
 
-export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse<StarAffinityRatio[]>
-) {
-    const result = await fetchAffinityRatio();
+dotenv.config();
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-    res.status(200).json(result.data.map((record: any) => {
-        return {
-            repoName: record.repo_name,
-            totalStars: record.total_stars,
-            ourStars: record.our_stars,
-            ratio: record.ratio,
-        }
-    }));
-}
+export default octokit;

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-export type StarAffinityRatio = {
-    repoName: string
-    totalStars: number,
-    ourStars: number,
-    ratio: number,
+export type RequestedReviewerData = {
+    pr: string,
+    reviewer: string,
 }

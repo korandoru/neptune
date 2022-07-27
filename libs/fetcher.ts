@@ -21,36 +21,3 @@ export async function fetcher<JSON = any>(
     const res = await fetch(input, init)
     return res.json()
 }
-
-export async function fetchAffinityRatio() {
-    const queryParams = new URLSearchParams({
-        "user": "explorer",
-        "default_format": "JSON",
-    });
-    const response = await fetch(`https://play.clickhouse.com?${queryParams}`, {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: `
-        SELECT
-            repo_name,
-            uniq(actor_login) AS total_stars,
-            uniqIf(actor_login, actor_login IN
-            (
-                SELECT actor_login
-                FROM github_events
-                WHERE (event_type = 'WatchEvent') AND (startsWith(repo_name, 'apache/pulsar'))
-            )) AS our_stars,
-            round(our_stars / total_stars, 2) AS ratio
-        FROM github_events
-        WHERE (event_type = 'WatchEvent') AND (NOT startsWith(repo_name, 'apache/pulsar'))
-        GROUP BY repo_name
-        HAVING total_stars >= 100
-        ORDER BY ratio DESC
-        LIMIT 50
-        `
-    });
-    return await response.json();
-}

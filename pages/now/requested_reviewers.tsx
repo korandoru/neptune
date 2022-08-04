@@ -20,9 +20,71 @@ import {fetcher} from "../../libs/fetcher";
 import Head from "next/head";
 import Footer from '../../components/footer';
 import Loading from '../../components/loading';
+import EChartsReact from "echarts-for-react";
 
 export default function RequestedReviewers() {
     const {data} = useSWR<RequestedReviewerData[]>('/api/github/requested_reviewers', fetcher);
+
+    let payload = <Loading/>;
+    if (data) {
+        let prByReviewer = new Map<string, string[]>();
+        for (const entry of data) {
+            let prs = prByReviewer.get(entry.reviewer);
+            if (!prs) {
+                prs = [];
+                prByReviewer.set(entry.reviewer, prs);
+            }
+            prs.push(entry.pr);
+        }
+        let chartData = [];
+        for (const [reviewer, prs] of prByReviewer) {
+            chartData.push([reviewer, prs.length]);
+        }
+        let options = {
+            dataset: [
+                {
+                    dimensions: ['reviewer', 'count'],
+                    source: chartData
+                },
+                {
+                    transform: {
+                        type: 'sort',
+                        config: { dimension: 'count', order: 'desc' }
+                    }
+                }
+            ],
+            xAxis: {
+                name: 'reviewer',
+                type: 'category',
+                axisLabel: { interval: 0, rotate: 30 }
+            },
+            yAxis: {
+                name: 'count',
+            },
+            series: {
+                type: 'bar',
+                encode: { x: 'reviewer', y: 'count' },
+                datasetIndex: 1,
+                label: {
+                    normal: {
+                        show: true,
+                        position: 'top'
+                    }
+                }
+            }
+        };
+        payload = <EChartsReact
+            option={options}
+            className="w-full mt-10"
+            onEvents={{
+                'click': function (params: any) {
+                    const data = params.data;
+                    const prs = prByReviewer.get(data[0]);
+                    console.log(prs);
+                }
+            }}
+        />
+    }
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -37,27 +99,7 @@ export default function RequestedReviewers() {
                     GitHub Requested Reviewers
                 </h1>
 
-                {data ? (
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>Reviewer</th>
-                                <th>Pull Request</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {data.map((record) => (
-                                <tr key={record.reviewer}>
-                                    <td>{record.reviewer}</td>
-                                    <td>{record.pr}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>)
-                    : (
-                        <Loading/>
-                    )
-                }
+                {payload}
             </main>
 
             <Footer/>
